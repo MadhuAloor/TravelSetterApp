@@ -32,19 +32,22 @@ class JetSetterStore extends EventEmitter {
                     this.emit('change');
                     break;
                 case 'MARK_ALL_AS_UNPACKED':
-                    jetSetter.items = [];
-                    this.emit('change');
-                    break;
-                case 'CHANGE_PACKED_STATUS':
-                    jetSetter.items.map(item => {
-                        if (item.id === action.value.id)
-                            item.packed = !item.packed;
+                    jetSetter.items = jetSetter.items.map(item => {
+                        item.packed = false;
                         return item;
                     });
                     this.emit('change');
                     break;
+                case 'CHANGE_PACKED_STATUS':
+                    jetSetter.items = jetSetter.items.map(item => {
+                        if (item.id !== action.value.id)
+                            return item;
+                        return { ...action.value, packed: !action.value.packed }
+                    });
+                    this.emit('change');
+                    break;
                 default:
-                    return false;   
+                    return false;
             }
         });
     }
