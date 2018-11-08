@@ -1,55 +1,42 @@
 import React, { Component } from 'react';
-import uniqueId from 'lodash/uniqueId';
+import JetSetter from '../JetSetterStore';
+import * as actions from '../actions';
 import CountDown from './CountDown';
 import NewItem from './NewItem';
 import Items from './Items';
 
 import './Application.css';
 
-const defaultState = [
-  { value: 'Pants', id: uniqueId(), packed: false },
-  { value: 'Jacket', id: uniqueId(), packed: false },
-  { value: 'iPhone Charger', id: uniqueId(), packed: false },
-  { value: 'MacBook', id: uniqueId(), packed: false },
-  { value: 'Sleeping Pills', id: uniqueId(), packed: true },
-  { value: 'Hat', id: uniqueId(), packed: false },
-  { value: 'T-Shirts', id: uniqueId(), packed: false },
-  { value: 'Belt', id: uniqueId(), packed: false },
-  { value: 'Passport', id: uniqueId(), packed: true },
-  { value: 'Sandwich', id: uniqueId(), packed: true },
-];
-
 class Application extends Component {
-  state = {
-    // Set the initial state,
-    items: defaultState,
-  };
+  state = JetSetter.getState();
+
+
+  updateJetSetter = () => {
+    this.setState(JetSetter.getState());
+  }
+
+  componentDidMount() {
+    JetSetter.on('change', this.updateJetSetter);
+  }
+
+  componentWillUnmount() {
+    JetSetter.off('change', this.updateJetSetter);
+  }
 
   addItem = (item) =>{
-    this.setState({items:[item, ...this.state.items]});
+    actions.addItem(item);
   }
   
    removeItem = (itemToRemove)=>{
-     this.setState({items:this.state.items.filter(item=> item.id !==itemToRemove.id)})
+     actions.removeItem(itemToRemove);
    }
 
    toggleItem = (itemToToggle) =>{
-     const items = this.state.items.map(item => {
-       if(item.id !== itemToToggle.id)
-       return item ;
-       return { ...itemToToggle,packed: !itemToToggle.packed}
-     });
-
-     this.setState({items});
+      actions.changePackedStatus(itemToToggle);
    }
 
    markAllAsUnpacked = () =>{
-     const items = this.state.items.map(item=>{
-       item.packed = false;
-       return item;
-     })
-
-     this.setState({items});
+     actions.markAllAsUnpacked();
    }
   // How are we going to manipulate the state?
   // Ideally, users are going to want to add, remove,
